@@ -1,13 +1,11 @@
-const express = require('express');
-const mysql = require('mysql');
-const cors = require("cors");
-const bodyParser = require('body-parser');
-const { error } = require('console');
-const { Sequelize } = require('sequelize');
-
-const PORT = process.env.PORT || 8000;
-
-const app = express();
+var express = require('express');
+var mysql = require('mysql');
+var cors = require("cors");
+var bodyParser = require('body-parser');
+var { error } = require('console');
+var { Sequelize } = require('sequelize');
+var app = express();
+var port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -33,7 +31,7 @@ const connection = new Pool({
 });
 */
 
-app.listen(PORT, () => console.log(`servidor corriendo en puerto ${PORT}`));
+app.listen(port, () => console.log(`Servidor corriendo en puerto ${port}`));
 
 connection.connect(error => {
     if (error) throw error;
@@ -41,8 +39,8 @@ connection.connect(error => {
 });
 
 
-app.get('/api/patas', (req,res) =>{
-    res.send('Welcome api patitas');
+app.get('/api/1romayo', (req,res) =>{
+    res.send('Welcome api 1ro mayo');
 });
 
 app.get('/api/usuarios', (req,res) =>{
@@ -58,6 +56,19 @@ app.get('/api/usuarios', (req,res) =>{
          }
      })
  });
+
+ app.post('/api/login', (req,res) =>{
+    const{usuario,contra} = req.body;
+    const sql = `SELECT * from usuarios where (nombreUsuario = '${usuario}' AND password = '${contra}')`;
+    connection.query(sql,(error,results)=>{
+        if(error) throw error;
+        if(results.length > 0){
+            res.json({status:'iniciaste sesion', user:usuario})
+        }else{
+            res.json([])
+        }
+    })
+});
 
  app.get('/api/noticias', (req,res) =>{
     // const  { usuario } = req.params;
@@ -86,3 +97,50 @@ app.get('/api/usuarios', (req,res) =>{
          }
      })
  });
+
+ app.post('/api/crear-noticia', (req,res) =>{
+    const{titulo,descripcion,fecha,foto} = req.body;
+    const sql = `insert into noticias(titulo,descripcion,fechaCreacion, status,foto) values('${titulo}','${descripcion}','${fecha}','A',null)`;
+    connection.query(sql,(error,results)=>{
+        if(error) throw error
+        else{
+            res.json({status : 'noticia creada'})
+        }
+
+    })
+});
+
+app.put('/api/editar-noticia/:id', (req,res) =>{
+    const{id} = req.params;
+    const{titulo,descripcion,fecha,status} = req.body;
+    let sql = `update noticias set 
+    titulo = '${titulo}',
+    descripcion = '${descripcion}',
+    fechaCreacion = '${fecha}',
+    status = '${status}',
+    foto = null
+    where idnoticia = '${id}'`
+
+    connection.query(sql,(error,results)=>{
+        if(error) throw error
+        else{
+            res.json({status:'noticia editada'})
+        }
+    }
+    );
+});
+
+app.delete('/api/eliminar/:id', (req,res) =>{
+    const sql = `delete FROM noticias where idnoticia = ${req.params.id}`;
+     connection.query(sql,(error,results)=>{
+         if(error) throw error
+         else{
+            if(results.affectedRows > 0){
+                res.json({"mensaje":"noticia eliminada con exito"});
+            }else{
+                res.json({"error":"No hay noticia con el id especificado"});
+            }
+             
+         }
+     })
+});
