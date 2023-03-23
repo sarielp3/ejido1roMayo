@@ -10,7 +10,7 @@ var port = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
     host: 'us-cdbr-east-06.cleardb.net', 
     user:'bb870f7b453952',
     password:'e845821f1975d4d',
@@ -33,10 +33,7 @@ const connection = new Pool({
 
 app.listen(port, () => console.log(`Servidor corriendo en puerto ${port}`));
 
-connection.connect(error => {
-    if (error) throw error;
-    console.log('Database server running!');
-});
+
 
 
 app.get('/api/1romayo', (req,res) =>{
