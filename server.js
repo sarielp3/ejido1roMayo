@@ -4,17 +4,19 @@ var cors = require("cors");
 var bodyParser = require('body-parser');
 var { error } = require('console');
 var { Sequelize } = require('sequelize');
+const fileUpload = require('express-fileupload');
 var app = express();
 var port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(fileUpload());
 
 const connection = mysql.createPool({
-    host: 'us-cdbr-east-06.cleardb.net', 
-    user:'bb870f7b453952',
-    password:'e845821f1975d4d',
-    database:'heroku_341c3018c52ae10'
+    host: 'localhost', 
+    user:'root',
+    password:'1655597',
+    database:'bd_ejidomayo'
 });
 /*
 const Pool = require("pg").Pool;
@@ -73,8 +75,12 @@ app.get('/api/usuarios', (req,res) =>{
      connection.query(sql,(error,results)=>{
          if(error) throw error;
          if(results){
-             res.json(results);
-             console.log(results);
+             //results.map(result => `data:image/png;base64,${result.foto.toString('base64')}`)
+             results.forEach(function(result) {
+               result.foto = `data:image/png;base64,${result.foto.toString('base64')}`;
+            });
+            res.json(results);
+            console.log(results);
          }else{
              res.json('nada');
          }
@@ -87,6 +93,9 @@ app.get('/api/usuarios', (req,res) =>{
      connection.query(sql,(error,results)=>{
          if(error) throw error;
          if(results){
+            results.forEach(function(result) {
+                result.foto = `data:image/png;base64,${result.foto.toString('base64')}`;
+             });
              res.json(results);
              console.log(results);
          }else{
@@ -96,8 +105,11 @@ app.get('/api/usuarios', (req,res) =>{
  });
 
  app.post('/api/crear-noticia', (req,res) =>{
-    const{titulo,descripcion,fecha,foto} = req.body;
-    const sql = `insert into noticias(titulo,descripcion,fechaCreacion, status,foto) values('${titulo}','${descripcion}','${fecha}','A',null)`;
+    const{titulo,descripcion,fechaCreacion,foto} = req.body;
+    console.log(req.body.foto + "-" + titulo);
+    console.log(req.body);
+    console.log(JSON.stringify(req.body.foto)) ;
+    const sql = `insert into noticias(titulo,descripcion,fechaCreacion, status,foto) values('${titulo}','${descripcion}','${fechaCreacion}','A','${foto}')`;
     connection.query(sql,(error,results)=>{
         if(error) throw error
         else{
